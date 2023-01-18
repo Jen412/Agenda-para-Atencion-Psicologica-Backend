@@ -1,0 +1,33 @@
+{
+  "name": "agenda-para-atencion-psicologica-backend",
+  "version": "1.0.0",
+  "description": "Backend del sistema de Agenda para atención pscicologica",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jen412/Agenda-para-Atencion-Psicologica-Backend.git"
+  },
+  "keywords": [
+    "MERN",
+    "Node"
+  ],
+  "author": "Juan Fernando Brambila Rivera",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jen412/Agenda-para-Atencion-Psicologica-Backend/issues"
+  },
+  "homepage": "https://github.com/Jen412/Agenda-para-Atencion-Psicologica-Backend#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
