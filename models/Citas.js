@@ -37,7 +37,8 @@ export const Citas = sequelize.define("Citas",{
         defaultValue: true
     },
     idColaborador:{
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     idPaciente:{
         type: DataTypes.INTEGER
