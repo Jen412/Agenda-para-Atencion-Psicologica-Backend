@@ -1,6 +1,5 @@
 import { Usuario } from "../models/Usuarios.js";
 import { HorarioUsuario } from "../models/HorarioUsuario.js";
-
 import bcrypt from "bcrypt";
 
 const obtenerUsuarios = async (req, res) =>{

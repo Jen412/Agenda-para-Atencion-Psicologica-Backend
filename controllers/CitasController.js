@@ -1,4 +1,10 @@
+//Models
 import {  Citas } from "../models/Citas.js";
+import { Estudiantes } from "../models/Estudiantes.js";
+import { Personal } from "../models/Personal.js";
+//Helpers
+import { emailCitaCancelada, emailConfirmarCita } from "../helpers/emails.js";
+import { formatoFecha } from "../helpers/formatoFecha.js";
 
 const obtenerCitas = async (req, res) =>{ 
     const citas = await Citas.findAll();
@@ -19,6 +25,20 @@ const agregarCita = async (req, res)=>{
     const cita = req.body;
     try {
         const newCita = await Citas.create(cita);
+        let paciente="";
+        if (newCita.estudiante) {
+            paciente = await Estudiantes.findByPk(newCita.idPaciente);
+        }
+        else{
+            paciente= await Personal.findByPk(newCita.idPaciente);
+        }
+        await emailConfirmarCita({
+            email: paciente.email, 
+            nombre: (paciente.nombre + " "+ paciente.apellidoP + " "+ paciente.apellidoM),
+            usuario: newCita.idPaciente,
+            fecha: formatoFecha(newCita.fechaCita),
+            hora: newCita.horaCita
+        });
         return res.json(newCita);
     } catch (error) {
         console.log("🚀 ~ file: CitasController.js:24 ~ agregarCita ~ error", error)
@@ -65,7 +85,7 @@ const eliminarCita = async (req, res) =>{
         console.log("🚀 ~ file: CitasController.js:68 ~ eliminarCita ~ error", error)
     }
 }
-
+//TODO: Arreglar el envio de emails
 const cancelarCita = async (req, res) =>{
     const {id} = req.params;
     const cita = await Citas.findByPk(id);
@@ -76,6 +96,19 @@ const cancelarCita = async (req, res) =>{
     try {
         cita.fechaCancelacion = Date.now();
         const citaCancelada = await cita.save();
+        let paciente="";
+        if (citaCancelada.estudiante) {
+            paciente = await Estudiantes.findByPk(citaCancelada.idPaciente);
+        }
+        else{
+            paciente= await Personal.findByPk(citaCancelada.idPaciente);
+        }
+        await emailCitaCancelada({
+            fecha: formatoFecha(citaCancelada.fechaCita),
+            hora: citaCancelada.horaCita,
+            email: citaCancelada.email
+        });
+
         return res.json(citaCancelada);
     } catch (error) {
         console.log("🚀 ~ file: CitasController.js:81 ~ cancelarCita ~ error", error)
