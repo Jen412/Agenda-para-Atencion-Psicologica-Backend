@@ -5,6 +5,7 @@ import { Personal } from "../models/Personal.js";
 //Helpers
 import { emailCitaCancelada, emailConfirmarCita } from "../helpers/emails.js";
 import { formatoFecha } from "../helpers/formatoFecha.js";
+import { Colaborador } from "../models/Colaboradores.js";
 
 const obtenerCitas = async (req, res) =>{ 
     const citas = await Citas.findAll();
@@ -85,7 +86,7 @@ const eliminarCita = async (req, res) =>{
         console.log("🚀 ~ file: CitasController.js:68 ~ eliminarCita ~ error", error)
     }
 }
-//TODO: Arreglar el envio de emails
+
 const cancelarCita = async (req, res) =>{
     const {id} = req.params;
     const cita = await Citas.findByPk(id);
@@ -103,12 +104,12 @@ const cancelarCita = async (req, res) =>{
         else{
             paciente= await Personal.findByPk(citaCancelada.idPaciente);
         }
+        console.log(citaCancelada);
         await emailCitaCancelada({
             fecha: formatoFecha(citaCancelada.fechaCita),
             hora: citaCancelada.horaCita,
-            email: citaCancelada.email
+            email: paciente.email
         });
-
         return res.json(citaCancelada);
     } catch (error) {
         console.log("🚀 ~ file: CitasController.js:81 ~ cancelarCita ~ error", error)
@@ -117,12 +118,12 @@ const cancelarCita = async (req, res) =>{
 
 const confirmarCita = async(req, res)=>{
     const {id} = req.params;
-    const cita = await Citas.findByPk(id);
-    if (!cita) {
-        const error = new Error("Cita no Econtrada");     
-        return res.status(404).json({mensaje: error.message});
-    }
     try {
+        const cita = await Citas.findByPk(id);
+        if (!cita) {
+            const error = new Error("Cita no Econtrada");     
+            return res.status(404).json({mensaje: error.message});
+        }
         cita.fechaConfirmacion = Date.now();
         const citaConfirmada = await cita.save();
         return res.json(citaConfirmada);
@@ -131,6 +132,90 @@ const confirmarCita = async(req, res)=>{
     }
 }
 
+const agregarColab = async(req, res)=>{
+    const {id} = req.params;
+    const colab = req.body;
+    try {
+        const cita = await Citas.findByPk(id);
+        if (!cita) {
+            const error = new Error("Cita no Econtrada");     
+            return res.status(404).json({mensaje: error.message});
+        }
+        const newColab = await Colaborador.create(colab);
+        res.json(newColab);
+    } catch (error) {6
+        console.log("🚀 ~ file: CitasController.js:147 ~ agregarColab ~ error", error)
+    }
+}
+
+const obtenerColabs= async(req, res)=>{
+    const {id} = req.params;
+    try {
+        const cita = await Citas.findByPk(id);
+        if (!cita) {
+            const error = new Error("Cita no Econtrada");     
+            return res.status(404).json({mensaje: error.message});
+        }
+        const colabs= await Colaborador.findAll({
+            where: {
+                idCita: id
+            }
+        });
+        res.json(colabs);
+    }
+    catch(error){
+        console.log("🚀 ~ file: CitasController.js:167 ~ obtenerColabs ~ error", error)
+    }
+}
+
+const obtenerColab = async (req, res)=>{
+    const {idCita, idColab} = req.params;
+    try {
+        const cita = await Citas.findByPk(idCita);
+        if (!cita) {
+            const error = new Error("Cita no Econtrada");     
+            return res.status(404).json({mensaje: error.message});
+        }
+        const colab= await Colaborador.findOne({
+            where: {
+                idCita: idCita,
+                idColab: idColab
+            }
+        });
+        res.json(colab);
+    }
+    catch(error){
+        console.log("🚀 ~ file: CitasController.js:188 ~ obtenerColab ~ error", error)
+    }
+}
+
+const eliminarColab = async (req, res)=>{
+    const {idCita, idColab} = req.params;
+    try {
+        const cita = await Citas.findByPk(idCita);
+        if (!cita) {
+            const error = new Error("Cita no Econtrada");     
+            return res.status(404).json({mensaje: error.message});
+        }
+        const colab= await Colaborador.findOne({
+            where: {
+                idCita: idCita,
+                idColab: idColab
+            }
+        });
+        await colab.destroy({
+            where: {
+                idColab: idColab
+            }
+        });
+        res.json({mensaje: "Colaborador Eliminado"});
+    }
+    catch(error){
+        console.log("🚀 ~ file: CitasController.js:214 ~ eliminarColab ~ error", error)
+    }
+}
+
+
 export{
     obtenerCitas,
     agregarCita,
@@ -138,5 +223,9 @@ export{
     eliminarCita,
     obtenerCita,
     cancelarCita,
-    confirmarCita
+    confirmarCita,
+    agregarColab,
+    obtenerColabs,
+    obtenerColab,
+    eliminarColab,
 }

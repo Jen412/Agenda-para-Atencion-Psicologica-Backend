@@ -6,7 +6,11 @@ import {
     eliminarCita,
     obtenerCita,
     cancelarCita,
-    confirmarCita
+    confirmarCita,
+    agregarColab,
+    obtenerColabs,
+    obtenerColab,
+    eliminarColab,
 } from "../controllers/CitasController.js";
 
 const router = express.Router();
@@ -21,5 +25,14 @@ router.route("/:id")
 
 router.post("/cancelar/:id", cancelarCita);
 router.post("/confirmar/:id", confirmarCita);
+
+//Cobaloradores
+router.post("/colab/:id", agregarColab);
+router.get("/colab/:id", obtenerColabs);
+
+router.route("/colab/:idCita/:idColab")
+    .get(obtenerColab)
+    .delete(eliminarColab);
+
 
 export default router;

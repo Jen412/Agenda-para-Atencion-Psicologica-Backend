@@ -36,11 +36,8 @@ export const Citas = sequelize.define("Citas",{
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
-    idColaborador:{
-        type: DataTypes.INTEGER,
-        allowNull: true
-    },
     idPaciente:{
         type: DataTypes.INTEGER
     }
 },{timestamps:false});
+
