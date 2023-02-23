@@ -1,5 +1,6 @@
 import { Usuario } from "../models/Usuarios.js";
 import { HorarioUsuario } from "../models/HorarioUsuario.js";
+import generarJWT from "../helpers/generarJWT.js";
 import bcrypt from "bcrypt";
 
 const obtenerUsuarios = async (req, res) =>{
@@ -42,9 +43,8 @@ const modificarUsuario = async (req, res) =>{
             const error = new Error("Usuario no Econtrado");
             return res.status(404).json({mensaje: error.message});
         }
-        const saltRounds = 10;
-        const salt = bcrypt.genSaltSync(saltRounds);
-        let newPasword = bcrypt.hashSync(usuario.password, salt);
+        const salt = await bcrypt.genSalt(10);
+        let newPasword =await bcrypt.hash(usuario.password, salt);
 
         usuario.email = req.body.email || usuario.email;
         usuario.password = newPasword
@@ -175,7 +175,43 @@ const eliminarHorarioUsuario = async (req, res) => {
         });
         return res.json({mensaje: "Horario Eliminado"});
     } catch (error) {
+        console.log("🚀 ~ file: UsuarioController.js:178 ~ eliminarHorarioUsuario ~ error", error)
     }
+}
+
+const comprobarPassword = async (password, passwordForm) => {
+    return await bcrypt.compare(passwordForm, password)
+}
+
+const autenticar = async (req, res) => {
+    const {email, password} = req.body
+    try {
+        const usuario = await Usuario.findOne({
+            where: {
+                email: email
+            }
+        });
+        //Comprobar si el usuario existe
+        if (!usuario) {
+            const error = new Error("El usuario no existe");
+            return res.status(404).json({msg: error.message})
+        } 
+        //Comprobar el password
+        if (await comprobarPassword(usuario.password, password)) { 
+            res.json({
+                idUsuario: usuario.idUsuario,  
+                email: usuario.email,
+                token: generarJWT(usuario.idHorario)
+            });
+        }
+        else{
+            const error = new Error("El Password es Incorrecto");
+            return res.status(403).json({msg: error.message})
+        }
+    } catch (error) {
+        console.log("🚀 ~ file: UsuarioController.js:212 ~ autenticar ~ error", error);
+    }
+    
 }
 
 
@@ -189,5 +225,6 @@ export{
     obtenerHorariosUsuario,
     obtenerHorarioUsuario,
     modificarHorarioUsuario,
-    eliminarHorarioUsuario
+    eliminarHorarioUsuario,
+    autenticar
 }

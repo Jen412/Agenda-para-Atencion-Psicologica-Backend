@@ -9,7 +9,8 @@ import {
     obtenerHorariosUsuario,
     obtenerHorarioUsuario,
     modificarHorarioUsuario,
-    eliminarHorarioUsuario
+    eliminarHorarioUsuario,
+    autenticar
 } from "../controllers/UsuarioController.js"
 
 const router = express.Router();
@@ -29,6 +30,8 @@ router.route("/:idUsuario/horario/:idHorario")
     .get(obtenerHorarioUsuario)
     .put(modificarHorarioUsuario)
     .delete(eliminarHorarioUsuario);
+
+router.post("/login", autenticar);
 
 
 export default router;

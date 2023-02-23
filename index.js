@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 
 import {sequelize} from "./db/database.js"
 
@@ -15,6 +16,21 @@ const app = express();
 app.use(express.json()); 
 
 dotenv.config();
+
+const whitelist= [process.env.FRONTEND_URL];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        console.log("🚀 ~ file: index.js:23 ~ origin", origin)
+        if (whitelist.includes(origin)) {
+            callback(null, true);
+        }
+        else{
+            callback(new Error("Error de cors con origen "+ origin))
+        }
+    }
+}
+app.use(cors(corsOptions));
 
 const port = process.env.PORT || 4000;
 
