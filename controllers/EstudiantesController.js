@@ -1,4 +1,6 @@
 import { Estudiantes } from "../models/Estudiantes.js";
+import bcrypt from "bcrypt";
+import generarJWT from "../helpers/generarJWT.js";
 
 const obtenerEstudiantes = async (req, res) =>{
     const estudiante = await Estudiantes.findAll();
@@ -17,7 +19,12 @@ const obtenerEstudiante = async (req, res) =>{
 
 const agregarEstudiante = async (req, res)=>{
     const estudiante = req.body;
+    const {password} = req.body;
     try {
+        const saltRounds = 10;
+        const salt = bcrypt.genSaltSync(saltRounds);
+        let newPasword = bcrypt.hashSync(password, salt);
+        estudiante.password = newPasword;
         const newStudent = await Estudiantes.create(estudiante);
         return res.json(newStudent);
     } catch (error) {

@@ -1,5 +1,6 @@
 import { sequelize } from "../db/database.js";
 import { DataTypes } from "sequelize";
+import { Notas } from "./Notas.js";
 
 export const Citas = sequelize.define("Citas",{
     idCita: {
@@ -15,10 +16,6 @@ export const Citas = sequelize.define("Citas",{
     },
     fechaConfirmacion:{
         type: DataTypes.DATE,
-        allowNull: true
-    },
-    notas: {
-        type: DataTypes.TEXT,
         allowNull: true
     },
     motivo:{
@@ -40,4 +37,14 @@ export const Citas = sequelize.define("Citas",{
         type: DataTypes.INTEGER
     }
 },{timestamps:false});
+
+Citas.hasMany(Notas,{
+    foreignKey: "idCita",
+    sourceKey: "idCita"
+});
+
+Notas.belongsTo(Citas, {
+    foreignKey: "idCita",
+    targetKey: "idCita"
+});
 

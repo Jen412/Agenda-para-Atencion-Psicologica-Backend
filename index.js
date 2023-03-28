@@ -21,7 +21,7 @@ const whitelist= [process.env.FRONTEND_URL];
 
 const corsOptions = {
     origin: function (origin, callback) {
-        console.log("🚀 ~ file: index.js:23 ~ origin", origin)
+        //console.log("🚀 ~ file: index.js:23 ~ origin", origin)
         if (whitelist.includes(origin)) {
             callback(null, true);
         }
@@ -39,9 +39,6 @@ app.use("/api/carreras", carrerasRoutes);
 app.use("/api/estudiantes", estudiantesRoutes);
 app.use("/api/personal", personalRoutes);
 app.use("/api/citas", citasRoutes);
-
-
-
 
 
 app.listen(port, async()=>{

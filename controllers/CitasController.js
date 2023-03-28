@@ -24,14 +24,23 @@ const obtenerCita = async (req, res) =>{
 
 const agregarCita = async (req, res)=>{
     const cita = req.body;
-    try {
+    try { 
         const newCita = await Citas.create(cita);
+        console.log(newCita)
         let paciente="";
         if (newCita.estudiante) {
-            paciente = await Estudiantes.findByPk(newCita.idPaciente);
-        }
+            paciente = await Estudiantes.findOne({
+                where: {
+                    numeroControl: newCita.idPaciente
+                }
+            });
+        }  
         else{
-            paciente= await Personal.findByPk(newCita.idPaciente);
+            paciente= await Personal.findOne({
+                where: {
+                    idPersonal: newCita.idPaciente 
+                }
+            });
         }
         await emailConfirmarCita({
             email: paciente.email, 
@@ -43,6 +52,7 @@ const agregarCita = async (req, res)=>{
         return res.json(newCita);
     } catch (error) {
         console.log("🚀 ~ file: CitasController.js:24 ~ agregarCita ~ error", error)
+        res.json(error)
     }
 }
 
@@ -55,7 +65,6 @@ const modificarCita = async (req, res) =>{
     }
     cita.horaCita = req.body.horaCita || cita.horaCita;
     cita.fechaCita = req.body.fechaCita || cita.fechaCita;
-    cita.notas = req.body.notas || cita.notas;
     cita.motivo = req.body.motivo || cita.motivo;
     cita.primeraCita = req.body.primeraCita || cita.primeraCita;
     cita.idColaborador = req.body.idColaborador || cita.idColaborador;

@@ -1,4 +1,6 @@
 import { Usuario } from "../models/Usuarios.js";
+import { Estudiantes } from "../models/Estudiantes.js";
+import { Personal } from "../models/Personal.js";
 import { HorarioUsuario } from "../models/HorarioUsuario.js";
 import generarJWT from "../helpers/generarJWT.js";
 import bcrypt from "bcrypt";
@@ -49,6 +51,7 @@ const modificarUsuario = async (req, res) =>{
         usuario.email = req.body.email || usuario.email;
         usuario.password = newPasword
         usuario.tipoUsuario = req.body.tipoUsuario || usuario.tipoUsuario;
+        usuario.turno = req.body.turno || usuario.turno;
         const usuarioActualizado = await usuario.save();
         return res.json(usuarioActualizado);
     } catch (error) {
@@ -184,7 +187,9 @@ const comprobarPassword = async (password, passwordForm) => {
 }
 
 const autenticar = async (req, res) => {
-    const {email, password} = req.body
+    const {email, password} = req.body;
+    let user = {};
+    let pass = "";
     try {
         const usuario = await Usuario.findOne({
             where: {
@@ -193,16 +198,52 @@ const autenticar = async (req, res) => {
         });
         //Comprobar si el usuario existe
         if (!usuario) {
-            const error = new Error("El usuario no existe");
-            return res.status(404).json({msg: error.message})
-        } 
-        //Comprobar el password
-        if (await comprobarPassword(usuario.password, password)) { 
-            res.json({
+            const estudiante = await Estudiantes.findOne({
+                where: {
+                    email: email
+                }
+            });
+            if (!estudiante) {
+                const personal = await Personal.findOne({
+                    where: {
+                        email: email
+                    }
+                });
+                if (!personal) {
+                    const error = new Error("El usuario no existe");
+                    return res.status(404).json({msg: error.message})
+                }
+                else{
+                    user = {
+                        idUsuario: personal.idPersonal,  
+                        email: personal.email,
+                        token: generarJWT(personal.idPersonal, personal.email),
+                        tipoUsuario: personal.tipoUsuario
+                    }
+                    pass = personal.password;
+                }
+            } else{
+                pass = estudiante.password;
+                user = {
+                    idUsuario: estudiante.numeroControl,  
+                    email: estudiante.email,
+                    token: generarJWT(estudiante.numeroControl, estudiante.email),
+                    tipoUsuario: estudiante.tipoUsuario
+                }
+            }
+        }else{
+            pass = usuario.password;
+            user = {
                 idUsuario: usuario.idUsuario,  
                 email: usuario.email,
-                token: generarJWT(usuario.idHorario)
-            });
+                token: generarJWT(usuario.idUsuario, usuario.email),
+                tipoUsuario: usuario.tipoUsuario
+            };
+        }
+         
+        //Comprobar el password
+        if (await comprobarPassword(pass, password)) { 
+            res.json(user);
         }
         else{
             const error = new Error("El Password es Incorrecto");
@@ -212,6 +253,11 @@ const autenticar = async (req, res) => {
         console.log("🚀 ~ file: UsuarioController.js:212 ~ autenticar ~ error", error);
     }
     
+}
+
+const perfil = async (req, res) =>{
+    const {usuario} = req;
+    res.json(usuario);
 }
 
 
@@ -226,5 +272,6 @@ export{
     obtenerHorarioUsuario,
     modificarHorarioUsuario,
     eliminarHorarioUsuario,
-    autenticar
+    autenticar,
+    perfil
 }

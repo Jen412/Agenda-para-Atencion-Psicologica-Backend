@@ -12,6 +12,13 @@ import {
     obtenerColab,
     eliminarColab,
 } from "../controllers/CitasController.js";
+import {
+    obtenerNotas, 
+    obtenerNota, 
+    agregarNota,
+    modificarNota,
+    eliminarNota
+} from "../controllers/NotasController.js";
 
 const router = express.Router();
 
@@ -25,6 +32,15 @@ router.route("/:id")
 
 router.post("/cancelar/:id", cancelarCita);
 router.post("/confirmar/:id", confirmarCita);
+
+//Notas
+router.get("/notas/:idCita", obtenerNotas);
+router.post("/notas/:idCita", agregarNota);
+
+router.route("/notas/:idCita/:idNota")
+    .get(obtenerNota)
+    .put(modificarNota)
+    .delete(eliminarNota);
 
 //Cobaloradores
 router.post("/colab/:id", agregarColab);

@@ -29,6 +29,19 @@ export const Personal = sequelize.define("Personal",{
     email: {
         type: DataTypes.STRING,
         unique: true,
+    },
+    password: {
+        type: DataTypes.STRING,
+    }, 
+    confirmado:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    token: {
+        type: DataTypes.STRING,
         allowNull: true
+    },
+    tipoUsuario:{
+        type: DataTypes.STRING
     }
 }, {timestamps:false});

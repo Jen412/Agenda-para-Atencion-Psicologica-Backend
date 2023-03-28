@@ -19,6 +19,9 @@ export const Usuario = sequelize.define("Usuario",{
     tipoUsuario: {
         type: DataTypes.STRING
     },
+    turno: {
+        type: DataTypes.STRING
+    }
 }, {timestamps:false});
 
 Usuario.hasMany(Citas, {
