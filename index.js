@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import {sequelize} from "./db/database.js"
+import {sequelize} from "./database/config/database.js";
 
 //importación de rutas 
 import usuarioRoutes from "./routes/usuarioRoutes.js";
@@ -10,6 +10,7 @@ import carrerasRoutes from "./routes/carrerasRoutes.js";
 import estudiantesRoutes from "./routes/estudiantesRoutes.js";
 import personalRoutes from "./routes/personalRoutes.js";
 import citasRoutes from "./routes/citasRoutes.js";
+import diasEspeciales from "./routes/diasEspecialesRoutes.js"
 
 const app = express();
 
@@ -39,13 +40,14 @@ app.use("/api/carreras", carrerasRoutes);
 app.use("/api/estudiantes", estudiantesRoutes);
 app.use("/api/personal", personalRoutes);
 app.use("/api/citas", citasRoutes);
+app.use("/api/dias-especiales", diasEspeciales);
 
 
 app.listen(port, async()=>{
-    try {
+    try { 
         await sequelize.sync({force: false}); 
     } catch (error) {
         console.error('Unable to connect to the database:', error);
-    }
+    }  
     console.log(`Servidor Corriendo en el puerto ${port}`);
-});
+});   

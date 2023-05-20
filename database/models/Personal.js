@@ -1,4 +1,4 @@
-import { sequelize } from "../db/database.js";
+import { sequelize } from "../config/database.js";
 import { DataTypes } from "sequelize";
 
 export const Personal = sequelize.define("Personal",{
@@ -33,6 +33,9 @@ export const Personal = sequelize.define("Personal",{
     password: {
         type: DataTypes.STRING,
     }, 
+    turno: {
+        type: DataTypes.STRING,
+    },
     confirmado:{
         type: DataTypes.BOOLEAN,
         defaultValue: false

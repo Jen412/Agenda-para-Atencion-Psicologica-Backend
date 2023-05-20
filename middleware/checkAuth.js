@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import { Usuario } from "../models/Usuarios.js";
-import { Estudiantes } from "../models/Estudiantes.js"
-import { Personal } from "../models/Personal.js";
+import { Usuario } from "../database/models/Usuarios.js";
+import { Estudiantes } from "../database/models/Estudiantes.js"
+import { Personal } from "../database/models/Personal.js";
  
 const checkAuth = async (req, res, next) =>{
     let token;
@@ -14,7 +14,7 @@ const checkAuth = async (req, res, next) =>{
                     idUsuario: decoded.id,
                     email: decoded.email
                 },
-                "attributes": ["idUsuario","email", "tipoUsuario"]
+                "attributes": ["idUsuario","email", "tipoUsuario", "turno"]
             });
             if(!usuario){
                 usuario = await Estudiantes.findOne({
@@ -22,7 +22,7 @@ const checkAuth = async (req, res, next) =>{
                         numeroControl: decoded.id,
                         email: decoded.email, 
                     },
-                    "attributes": ["numeroControl", "email", "tipoUsuario"]
+                    "attributes": ["numeroControl", "email", "tipoUsuario", "turno"]
                 });
                 if (!usuario) {
                     usuario = await Personal.findOne({
@@ -30,7 +30,7 @@ const checkAuth = async (req, res, next) =>{
                             idPersonal: decoded.id,
                             email: decoded.email, 
                         },
-                        "attributes": ["idPersonal", "email", "tipoUsuario"]
+                        "attributes": ["idPersonal", "email", "tipoUsuario", "turno"]
                     })
                 }
             }

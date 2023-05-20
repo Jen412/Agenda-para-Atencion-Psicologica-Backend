@@ -11,7 +11,8 @@ import {
     modificarHorarioUsuario,
     eliminarHorarioUsuario,
     autenticar,
-    perfil
+    perfil,
+    obtenerUsuarioPorTurno
 } from "../controllers/UsuarioController.js"
 
 import checkAuth from "../middleware/checkAuth.js";
@@ -22,6 +23,7 @@ router.get("/", obtenerUsuarios);
 router.post("/", agregarUsusario);
 router.post("/login", autenticar);
 router.get("/perfil", checkAuth, perfil);
+router.post("/turno", obtenerUsuarioPorTurno);
 
 router.route("/:id")
     .get(obtenerUsuario)

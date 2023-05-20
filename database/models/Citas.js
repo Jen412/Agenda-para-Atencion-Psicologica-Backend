@@ -1,13 +1,12 @@
-import { sequelize } from "../db/database.js";
+import { sequelize } from "../config/database.js";
 import { DataTypes } from "sequelize";
-import { Notas } from "./Notas.js";
 
 export const Citas = sequelize.define("Citas",{
     idCita: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
-    },
+    }, 
     horaCita:{
         type: DataTypes.TIME
     },
@@ -33,18 +32,15 @@ export const Citas = sequelize.define("Citas",{
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
+    observaciones: {
+        type: DataTypes.TEXT,
+        defaultValue: ""
+    },
+    procesada:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     idPaciente:{
         type: DataTypes.INTEGER
     }
 },{timestamps:false});
-
-Citas.hasMany(Notas,{
-    foreignKey: "idCita",
-    sourceKey: "idCita"
-});
-
-Notas.belongsTo(Citas, {
-    foreignKey: "idCita",
-    targetKey: "idCita"
-});
-

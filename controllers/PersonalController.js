@@ -1,4 +1,4 @@
-import {  Personal} from "../models/Personal.js";
+import {  Personal} from "../database/models/Personal.js";
 import bcrypt from "bcrypt";
 import generarJWT from "../helpers/generarJWT.js";
 
@@ -44,6 +44,7 @@ const modificarPersonal = async (req, res) =>{
     personal.apellidoM = req.body.apellidoM || personal.apellidoM;
     personal.sexo = req.body.sexo || personal.sexo;
     personal.telefono = req.body.telefono || personal.telefono;
+    personal.password = req.body.password || personal.password;
     personal.email = req.body.email || personal.email;
     try {
         const personalActualizado = await personal.save();

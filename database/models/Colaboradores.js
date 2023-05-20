@@ -1,4 +1,4 @@
-import { sequelize } from "../db/database.js";
+import { sequelize } from "../config/database.js";
 import { DataTypes } from "sequelize";
 import { Citas } from "./Citas.js";
 

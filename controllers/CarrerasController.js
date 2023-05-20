@@ -1,4 +1,4 @@
-import { Carreras } from "../models/Carreras.js";
+import { Carreras } from "../database/models/Carreras.js";
 
 const obtenerCarreras= async (req, res)=>{
     const carreras = await Carreras.findAll();
@@ -10,7 +10,7 @@ const obtenerCarrera= async (req, res)=>{
     const carrera = await Carreras.findByPk(id);
     if (!carrera) {
         const error = new Error("Carrera no Econtrada");
-        return res.status(404).json({mensaje: error.message});
+        return res.status(404).json({msg: error.message});
     }
     return res.json(carrera);
 }
@@ -31,7 +31,7 @@ const modificarCarrera= async (req, res)=>{
     const carrera =  await Carreras.findByPk(id);
     if (!carrera) {
         const error = new Error("Carrera no Econtrada");
-        return res.status(404).json({mensaje: error.message});
+        return res.status(404).json({msg: error.message});
     }
     carrera.nombreCarrera = req.body.nombreCarrera || carrera.nombreCarrera;
     try {
@@ -47,7 +47,7 @@ const eliminarCarrera= async (req, res)=>{
     const carrera =  await Carreras.findByPk(id);
     if (!carrera) {
         const error = new Error("Carrera no Econtrada");
-        return res.status(404).json({mensaje: error.message});
+        return res.status(404).json({msg: error.message});
     }
     try {
         await Carreras.destroy({
@@ -55,7 +55,7 @@ const eliminarCarrera= async (req, res)=>{
                 idCarrera: id
             }
         });
-        res.json({mensaje:"Carrera Eliminada Corectamente"});
+        res.json({msg:"Carrera Eliminada Corectamente"});
     } catch (error) {
         console.log("🚀 ~ file: CarrerasController.js:51 ~ eliminarCarrera ~ error", error)
     }

@@ -1,4 +1,4 @@
-import { sequelize } from "../db/database.js";
+import { sequelize } from "../config/database.js";
 import { DataTypes } from "sequelize";
 import {Citas} from "./Citas.js";
 import { HorarioUsuario } from "./HorarioUsuario.js";
@@ -14,6 +14,15 @@ export const Usuario = sequelize.define("Usuario",{
         type: DataTypes.STRING,
     },
     password: {
+        type: DataTypes.STRING
+    },
+    nombre:{
+        type: DataTypes.STRING
+    },
+    apellidoP:{
+        type: DataTypes.STRING
+    },
+    apellidoM:{
         type: DataTypes.STRING
     },
     tipoUsuario: {

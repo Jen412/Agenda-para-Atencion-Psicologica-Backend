@@ -1,4 +1,4 @@
-import { Estudiantes } from "../models/Estudiantes.js";
+import { Estudiantes } from "../database/models/Estudiantes.js";
 import bcrypt from "bcrypt";
 import generarJWT from "../helpers/generarJWT.js";
 
@@ -46,6 +46,7 @@ const modificarEstudiante = async (req, res) =>{
     estudiante.sexo = req.body.sexo || estudiante.sexo;
     estudiante.telefono = req.body.telefono || estudiante.telefono;
     estudiante.email = req.body.email || estudiante.email;
+    estudiante.password = req.body.password || estudiante.password;
     estudiante.idCarrera = req.body.idCarrera || estudiante.idCarrera;
     try {
         const estudianteActualizado = await estudiante.save();

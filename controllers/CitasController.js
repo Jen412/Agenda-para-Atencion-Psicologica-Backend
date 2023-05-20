@@ -1,15 +1,35 @@
-//Models
-import {  Citas } from "../models/Citas.js";
-import { Estudiantes } from "../models/Estudiantes.js";
-import { Personal } from "../models/Personal.js";
+//database/models
+import {  Citas } from "../database/models/Citas.js";
+import { Estudiantes } from "../database/models/Estudiantes.js";
+import { Personal } from "../database/models/Personal.js";
+import { Usuario } from "../database/models/Usuarios.js";
 //Helpers
 import { emailCitaCancelada, emailConfirmarCita } from "../helpers/emails.js";
 import { formatoFecha } from "../helpers/formatoFecha.js";
-import { Colaborador } from "../models/Colaboradores.js";
+import { Colaborador } from "../database/models/Colaboradores.js";
 
 const obtenerCitas = async (req, res) =>{ 
-    const citas = await Citas.findAll();
-    return res.json(citas);
+    try {
+        const citas = await Citas.findAll();
+        return res.json(citas);
+    } catch (error) {
+        console.log("🚀 ~ file: CitasController.js:15 ~ obtenerCitas ~ error:", error);
+    }
+}
+
+const obtenerCitaPaciente = async (req, res)=>{
+    const {idPaciente} = req.params;
+    try {
+        const citas = await Citas.findAll({
+            where: {
+                idPaciente: idPaciente
+            }
+        });
+        return res.json(citas);
+    } catch (error) {
+        res.json(error);
+        console.log("🚀 ~ file: CitasController.js:29 ~ obtenerCitaPaciente ~ error:", error)
+    }
 }
 
 const obtenerCita = async (req, res) =>{
@@ -45,9 +65,9 @@ const agregarCita = async (req, res)=>{
         await emailConfirmarCita({
             email: paciente.email, 
             nombre: (paciente.nombre + " "+ paciente.apellidoP + " "+ paciente.apellidoM),
-            usuario: newCita.idPaciente,
             fecha: formatoFecha(newCita.fechaCita),
-            hora: newCita.horaCita
+            hora: newCita.horaCita, 
+            idCita: newCita.idCita
         });
         return res.json(newCita);
     } catch (error) {
@@ -58,18 +78,19 @@ const agregarCita = async (req, res)=>{
 
 const modificarCita = async (req, res) =>{
     const {id} = req.params;
-    const cita =  await Citas.findByPk(id);
-    if (!cita) {
-        const error = new Error("Cita no Econtrada");
-        return res.status(404).json({mensaje: error.message});
-    }
-    cita.horaCita = req.body.horaCita || cita.horaCita;
-    cita.fechaCita = req.body.fechaCita || cita.fechaCita;
-    cita.motivo = req.body.motivo || cita.motivo;
-    cita.primeraCita = req.body.primeraCita || cita.primeraCita;
-    cita.idColaborador = req.body.idColaborador || cita.idColaborador;
-    cita.idPaciente = req.body.idPaciente || cita.idPaciente;
     try {
+        const cita =  await Citas.findByPk(id);
+        if (!cita) {
+            const error = new Error("Cita no Econtrada");
+            return res.status(404).json({mensaje: error.message});
+        }
+        cita.horaCita = req.body.horaCita || cita.horaCita;
+        cita.fechaCita = req.body.fechaCita || cita.fechaCita;
+        cita.motivo = req.body.motivo || cita.motivo;
+        cita.primeraCita = req.body.primeraCita || cita.primeraCita;
+        cita.idColaborador = req.body.idColaborador || cita.idColaborador;
+        cita.idPaciente = req.body.idPaciente || cita.idPaciente;
+        cita.observaciones = req.body.observaciones || cita.observaciones;
         const citaActualizada = await cita.save();
         return res.json(citaActualizada);
     } catch (error) {
@@ -113,7 +134,7 @@ const cancelarCita = async (req, res) =>{
         else{
             paciente= await Personal.findByPk(citaCancelada.idPaciente);
         }
-        console.log(citaCancelada);
+        //console.log(citaCancelada);
         await emailCitaCancelada({
             fecha: formatoFecha(citaCancelada.fechaCita),
             hora: citaCancelada.horaCita,
@@ -224,6 +245,81 @@ const eliminarColab = async (req, res)=>{
     }
 }
 
+const primeraCita = async (req, res)=> {
+    const {idPaciente} = req.body;
+    try {
+        const cita = await Citas.findAll({
+            where:{
+                idPaciente: idPaciente
+            }
+        });
+        if (cita.length ===0) {
+            res.json({primeraCita: true});
+        }
+        else{
+            res.json({
+                primeraCita:false
+            });
+        }
+    } catch (error) {
+        console.log("🚀 ~ file: CitasController.js:243 ~ primeraCita ~ error:", error)
+    }
+}
+
+const numeroDeCitas = async (req, res)=>{
+    const {idPaciente} = req.params;
+    try {
+        const citas = await Citas.findAll({
+            where: {
+                idPaciente: idPaciente,
+                fechaCancelacion: null
+            }
+        });
+        res.json({
+            numCitas: citas.length
+        })
+    } catch (error) {
+        console.log("🚀 ~ file: CitasController.js:280 ~ numeroDeCitas ~ error:", error)
+    }
+}
+
+const procesarCita = async (req, res) =>{
+    const {idCita} = req.params;
+    try {
+        const cita = await Citas.findByPk(idCita);
+        if (!cita) {
+            const error = new Error("Cita no Econtrada");
+            return res.status(404).json({mensaje: error.message});
+        }
+        cita.observaciones= req.body.observaciones || cita.observaciones;
+        cita.procesada= true;
+        const citaActualizada = await cita.save();
+        return res.json(citaActualizada);
+    } catch (error) {
+        console.log("🚀 ~ file: CitasController.js:299 ~ procesarCita ~ error:", error)
+    }
+}
+
+//Estadisticas
+const obtenerDatosEstadisticasCarreras = async (req, res) =>{
+    const {idCarrera} = req.params;
+    const {periodoTiempo} = req.body;
+    try {
+        const citas = await Citas.findAll({
+            where: {
+                idCarrera: idCarrera
+            }
+        });
+        if (periodoTiempo === "mes") {
+            const meses = ["Enero", "Ferbrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            
+        }
+    } catch (error) {
+        
+    }
+
+}
+
 
 export{
     obtenerCitas,
@@ -237,4 +333,9 @@ export{
     obtenerColabs,
     obtenerColab,
     eliminarColab,
+    primeraCita,
+    obtenerCitaPaciente,
+    numeroDeCitas,
+    procesarCita,
+    obtenerDatosEstadisticasCarreras
 }
