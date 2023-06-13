@@ -2,11 +2,12 @@
 import {  Citas } from "../database/models/Citas.js";
 import { Estudiantes } from "../database/models/Estudiantes.js";
 import { Personal } from "../database/models/Personal.js";
-import { Usuario } from "../database/models/Usuarios.js";
+import { Colaborador } from "../database/models/Colaboradores.js";
 //Helpers
 import { emailCitaCancelada, emailConfirmarCita } from "../helpers/emails.js";
 import { formatoFecha } from "../helpers/formatoFecha.js";
-import { Colaborador } from "../database/models/Colaboradores.js";
+import dayjs from "dayjs";
+import { sequelize } from "../database/config/database.js";
 
 const obtenerCitas = async (req, res) =>{ 
     try {
@@ -302,22 +303,171 @@ const procesarCita = async (req, res) =>{
 
 //Estadisticas
 const obtenerDatosEstadisticasCarreras = async (req, res) =>{
-    const {idCarrera} = req.params;
     const {periodoTiempo} = req.body;
+    const {idCarrera}= req.params
     try {
-        const citas = await Citas.findAll({
-            where: {
-                idCarrera: idCarrera
-            }
-        });
+        const [citas, metadata] = await sequelize.query("SELECT citas.fechaCita, citas.idPaciente, estudiantes.nombre, estudiantes.apellidoP, estudiantes.apellidoM,estudiantes.idCarrera FROM `estudiantes` JOIN citas ON citas.idPaciente = estudiantes.numeroControl WHERE citas.estudiante = 1;");
         if (periodoTiempo === "mes") {
             const meses = ["Enero", "Ferbrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            
+            let citasMes =[0,0,0,0,0,0,0,0,0,0,0,0];
+            for (let i = 0; i < meses.length; i++) {
+                citas.forEach(cita => {
+                    if (cita.idPaciente) {
+                        if (cita.idCarrera==idCarrera) {
+                            let month = cita.fechaCita;
+                            month = dayjs(cita.fechaCita);
+                            month = month.month();
+                            if (i === month) {
+                                citasMes[i]++;
+                            }
+                        }
+                    }
+                });
+            }
+            res.json({
+                labels: meses, 
+                citas: citasMes
+            });
+        }
+        else if(periodoTiempo ==="semestre"){
+            const semestres = ["Enero-Junio", "Julio-Diciembre"];
+            const citasSem = [0,0];
+            citas.forEach(cita =>{
+                if (cita.idPaciente) {
+                    if (cita.idCarrera==idCarrera) {
+                        let month = cita.fechaCita;
+                        month = dayjs(cita.fechaCita);
+                        month = month.month();
+                        if (month >=0 && month <=5) {
+                            citasSem[0]++;
+                        }
+                        else{
+                            citasSem[1]++;
+                        }
+                    }
+                }
+            });
+            res.json({
+                labels:semestres,
+                citas: citasSem
+            });
+        }
+        else if(periodoTiempo==="anual"){
+            let actualYear = dayjs(Date.now());
+            actualYear = actualYear.year();
+            const anios = [0,0,0,actualYear];
+            let cont =1;
+            for (let i = anios.length-2; i >= 0; i--) {
+                anios[i] = actualYear-cont;
+                cont++;
+            }
+            const citasAnio = [0,0,0,0];
+            for (let i = 0; i < anios.length; i++) {
+                citas.forEach(cita =>{
+                    if (cita.idPaciente) {
+                        if (cita.idCarrera==idCarrera) {
+                            let year = cita.fechaCita;
+                            year = dayjs(cita.fechaCita);
+                            year = year.year();
+                            if (year === anios[i]) {
+                                citasAnio[i]++;
+                            }
+                        }
+                    }
+                });
+            }
+            res.json({
+                labels: anios,
+                citas: citasAnio
+            });
         }
     } catch (error) {
-        
+        console.log("🚀 ~ file: CitasController.js:385 ~ obtenerDatosEstadisticasCarreras ~ error:", error)
     }
+}
 
+const obtenerDatosEstadisticasSexo = async (req, res)=>{
+    const {periodoTiempo} = req.body;
+    const {sexo}= req.params
+    try {
+        const [citas, metadata] = await sequelize.query("SELECT citas.fechaCita, citas.idPaciente, estudiantes.nombre, estudiantes.apellidoP, estudiantes.apellidoM,estudiantes.sexo FROM `estudiantes` JOIN citas ON citas.idPaciente = estudiantes.numeroControl WHERE citas.estudiante = 1;");
+        if (periodoTiempo === "mes") {
+            const meses = ["Enero", "Ferbrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            let citasMes =[0,0,0,0,0,0,0,0,0,0,0,0];
+            for (let i = 0; i < meses.length; i++) {
+                citas.forEach(cita => {
+                    if (cita.idPaciente) {
+                        if (cita.sexo==sexo) {
+                            let month = cita.fechaCita;
+                            month = dayjs(cita.fechaCita);
+                            month = month.month();
+                            if (i === month) {
+                                citasMes[i]++;
+                            }
+                        }
+                    }
+                });
+            }
+            res.json({
+                labels: meses, 
+                citas: citasMes
+            });
+        }
+        else if(periodoTiempo ==="semestre"){
+            const semestres = ["Enero-Junio", "Julio-Diciembre"];
+            const citasSem = [0,0];
+            citas.forEach(cita =>{
+                if (cita.idPaciente) {
+                    if (cita.sexo==sexo) {
+                        let month = cita.fechaCita;
+                        month = dayjs(cita.fechaCita);
+                        month = month.month();
+                        if (month >=0 && month <=5) {
+                            citasSem[0]++;
+                        }
+                        else{
+                            citasSem[1]++;
+                        }
+                    }
+                }
+            });
+            res.json({
+                labels:semestres,
+                citas: citasSem
+            });
+        }
+        else if(periodoTiempo==="anual"){
+            let actualYear = dayjs(Date.now());
+            actualYear = actualYear.year();
+            const anios = [0,0,0,actualYear];
+            let cont =1;
+            for (let i = anios.length-2; i >= 0; i--) {
+                anios[i] = actualYear-cont;
+                cont++;
+            }
+            const citasAnio = [0,0,0,0];
+            for (let i = 0; i < anios.length; i++) {
+                citas.forEach(cita =>{
+                    if (cita.idPaciente) {
+                        if (cita.sexo==sexo) {
+                            let year = cita.fechaCita;
+                            year = dayjs(cita.fechaCita);
+                            year = year.year();
+                            if (year === anios[i]) {
+                                citasAnio[i]++;
+                            }
+                        }
+                    }
+                });
+            }
+            res.json({
+                labels: anios,
+                citas: citasAnio
+            });
+        }
+    } catch (error) {
+        console.log("🚀 ~ file: CitasController.js:385 ~ obtenerDatosEstadisticasCarreras ~ error:", error)
+    }
 }
 
 
@@ -337,5 +487,6 @@ export{
     obtenerCitaPaciente,
     numeroDeCitas,
     procesarCita,
-    obtenerDatosEstadisticasCarreras
+    obtenerDatosEstadisticasCarreras,
+    obtenerDatosEstadisticasSexo
 }

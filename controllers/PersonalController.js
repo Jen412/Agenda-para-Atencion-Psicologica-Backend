@@ -23,14 +23,14 @@ const agregarPersonal = async (req, res)=>{
     try {
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds);
-        let newPasword = bcrypt.hashSync(password, salt);
+        let newPasword = await bcrypt.hashSync(password, salt);
         personal.password=newPasword;
         const newPersonal = await Personal.create(personal);
         return res.json(newPersonal);
     } catch (error) {
         console.log("🚀 ~ file: PersonalController.js:24 ~ agregarPersonal ~ error", error)
     }
-}
+} 
 
 const modificarPersonal = async (req, res) =>{
     const {id} = req.params;

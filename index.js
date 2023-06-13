@@ -22,7 +22,7 @@ const whitelist= [process.env.FRONTEND_URL];
 
 const corsOptions = {
     origin: function (origin, callback) {
-        //console.log("🚀 ~ file: index.js:23 ~ origin", origin)
+        console.log("🚀 ~ file: index.js:23 ~ origin", origin)
         if (whitelist.includes(origin)) {
             callback(null, true);
         }
@@ -30,7 +30,7 @@ const corsOptions = {
             callback(new Error("Error de cors con origen "+ origin))
         }
     }
-}
+} 
 app.use(cors(corsOptions));
 
 const port = process.env.PORT || 4000;

@@ -14,7 +14,9 @@ import {
     primeraCita,
     obtenerCitaPaciente,
     numeroDeCitas,
-    procesarCita
+    procesarCita,
+    obtenerDatosEstadisticasCarreras,
+    obtenerDatosEstadisticasSexo
 } from "../controllers/CitasController.js";
 
 const router = express.Router();
@@ -22,6 +24,8 @@ const router = express.Router();
 router.get("/", obtenerCitas);
 router.post("/", agregarCita);
 router.get("/paciente/:idPaciente", obtenerCitaPaciente);
+router.post("/estaditicas/:idCarrera", obtenerDatosEstadisticasCarreras);
+router.post("/estaditicas/sexo/:sexo", obtenerDatosEstadisticasSexo);
 
 router.route("/:id")
     .get(obtenerCita)
@@ -33,7 +37,6 @@ router.post("/cancelar/:id", cancelarCita);
 router.post("/confirmar/:id", confirmarCita);
 router.put("/procesar/:idCita", procesarCita);
 router.get("/numeroCitas/:idPaciente", numeroDeCitas);
-
 
 //Cobaloradores
 router.post("/colab/:id", agregarColab);

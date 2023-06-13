@@ -48,6 +48,7 @@ const modificarEstudiante = async (req, res) =>{
     estudiante.email = req.body.email || estudiante.email;
     estudiante.password = req.body.password || estudiante.password;
     estudiante.idCarrera = req.body.idCarrera || estudiante.idCarrera;
+    estudiante.tipoUsuario = req.body.tipoUsuario || estudiante.tipoUsuario;
     try {
         const estudianteActualizado = await estudiante.save();
         return res.json(estudianteActualizado);

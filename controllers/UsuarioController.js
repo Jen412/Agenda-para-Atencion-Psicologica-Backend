@@ -51,8 +51,9 @@ const modificarUsuario = async (req, res) =>{
         }
         let newPasword = usuario.password;
         if (req.body?.password != undefined || req.body?.password != null) {
-            const salt = await bcrypt.genSalt(10);
-            newPasword =await bcrypt.hash(usuario.password, salt);
+            const saltRounds = 10;
+            const salt = bcrypt.genSaltSync(saltRounds);
+            newPasword = bcrypt.hashSync(usuario.password, salt);
         }
         usuario.email = req.body.email || usuario.email;
         usuario.password = newPasword
@@ -249,7 +250,6 @@ const autenticar = async (req, res) => {
                 tipoUsuario: usuario.tipoUsuario
             };
         }
-         
         //Comprobar el password
         if (await comprobarPassword(pass, password)) { 
             res.json(user);
