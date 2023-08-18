@@ -135,11 +135,11 @@ const cancelarCita = async (req, res) =>{
         else{
             paciente= await Personal.findByPk(citaCancelada.idPaciente);
         }
-        //console.log(citaCancelada);
         await emailCitaCancelada({
             fecha: formatoFecha(citaCancelada.fechaCita),
             hora: citaCancelada.horaCita,
-            email: paciente.email
+            email: paciente.email,
+            usuario: paciente.nombre + " " + paciente.apellidoP + " " + paciente.apellidoM
         });
         return res.json(citaCancelada);
     } catch (error) {
