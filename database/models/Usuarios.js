@@ -30,6 +30,11 @@ export const Usuario = sequelize.define("Usuario",{
     },
     turno: {
         type: DataTypes.STRING
+    },
+    token: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        defaultValue: null
     }
 }, {timestamps:false});
 

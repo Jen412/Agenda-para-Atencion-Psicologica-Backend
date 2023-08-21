@@ -4,6 +4,8 @@ import { Personal } from "../database/models/Personal.js";
 import { HorarioUsuario } from "../database/models/HorarioUsuario.js";
 import generarJWT from "../helpers/generarJWT.js";
 import bcrypt from "bcrypt";
+import { emailOlvidePassword } from "../helpers/emails.js";
+import generarId from '../helpers/generarId.js';
 
 const obtenerUsuarios = async (req, res) =>{
     try {
@@ -62,6 +64,7 @@ const modificarUsuario = async (req, res) =>{
         usuario.nombre = req.body.nombre || usuario.nombre;
         usuario.apellidoP = req.body.apellidoP || usuario.apellidoP;
         usuario.apellidoM = req.body.apellidoM || usuario.apellidoM;
+        usuario.token = req.body.token || usuario.token;
         const usuarioActualizado = await usuario.save();
         return res.json(usuarioActualizado);
     } catch (error) {
@@ -296,6 +299,72 @@ const obtenerUsuarioPorTurno = async (req, res) =>{
     }
 }
 
+
+
+const olvidePassword = async (req, res) =>{
+    const {email} = req.body;
+    //comprobar si el usuario existe
+    const usuario = await Usuario.findOne({email});
+    if (!usuario) {
+        const error = new Error("El usuario no existe");
+        return res.status(404).json({msg: error.message})
+    }
+
+    try {
+        usuario.token= generarId();
+        await usuario.save();
+        //Enviar el Email
+        emailOlvidePassword({
+            email: usuario.email,
+            usuario: usuario.nombre,
+            token: usuario.token
+        })
+        res.json({msg: "Hemos enviado un email con las instrucciones"})
+    } catch (error) {
+        console.log("🚀 ~ file: UsuarioController.js ~ line 82 ~ olvidePassword ~ error", error)
+    }
+}
+
+
+const comprobarToken = async (req, res) => {
+    const {token} = req.params;
+    const tokenValido = await Usuario.findOne({token});
+
+    if (tokenValido) {
+        res.json({msg: "Token válido y el Usuario existe"})
+    }
+    else{
+        const error = new Error("Token no válido");
+        return res.status(404).json({msg: error.message})
+    }
+}
+
+const nuevoPassword = async (req, res) => {
+    const {token} = req.params;
+    const {password} =req.body;
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+    let newPasword = bcrypt.hashSync(password, salt);
+
+    const usuario = await Usuario.findOne({token});
+    if (usuario) {
+        usuario.password = newPasword;
+        usuario.token="";
+        try {
+            await usuario.save();
+            res.json({msg: "Password Modificado Correctamente "})
+        } catch (error) {
+            console.log("🚀 ~ file: UsuarioController.js ~ line 113 ~ nuevoPassword ~ error", error) 
+        }
+    } 
+    else{
+        const error = new Error("Token no válido");
+        return res.status(404).json({msg: error.message})
+    }
+}
+
+
+
 export{
     obtenerUsuarios,
     agregarUsusario,
@@ -309,5 +378,8 @@ export{
     eliminarHorarioUsuario,
     autenticar,
     perfil,
-    obtenerUsuarioPorTurno
+    obtenerUsuarioPorTurno,
+    olvidePassword,
+    nuevoPassword, 
+    comprobarToken
 }
