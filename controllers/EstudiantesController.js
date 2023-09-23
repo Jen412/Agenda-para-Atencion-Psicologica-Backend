@@ -26,6 +26,7 @@ const agregarEstudiante = async (req, res)=>{
         let newPasword = bcrypt.hashSync(password, salt);
         estudiante.password = newPasword;
         const newStudent = await Estudiantes.create(estudiante);
+        console.log("🚀 ~ file: EstudiantesController.js:29 ~ agregarEstudiante ~ newStudent:", newStudent)
         return res.json(newStudent);
     } catch (error) {
         console.log("🚀 ~ file: EstudiantesController.js:25 ~ agregarEstudiante ~ error", error)

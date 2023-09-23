@@ -286,6 +286,7 @@ const obtenerUsuarioPorTurno = async (req, res) =>{
                 msg: "Usuario no Encontrado"
             });
         }
+        console.log("🚀 ~ file: UsuarioController.js:285 ~ obtenerUsuarioPorTurno ~ usuario:", usuario)
         res.json({
             idUsuario: usuario.idUsuario, 
             nombre: usuario.nombre,
